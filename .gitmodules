@@ -1,0 +1,4 @@
+[submodule "easydb-library"]
+	path = easydb-library
+	url = https://github.com/programmfabrik/easydb-library
+	branch = master

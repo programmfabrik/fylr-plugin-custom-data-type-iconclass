@@ -1,0 +1,75 @@
+plugin:
+  name: custom-data-type-iconclass
+  version: 1
+  url: https://github.com/programmfabrik/fylr-custom-data-type-iconclass
+  displayname:
+    de-DE: Iconclass-Verknüpfung
+    en-US: Iconclass-Referencing
+  info:
+    de-DE: Stellt Verknüpfungen mit dem Normdatendienst Iconclass her.
+    en-US: Use for references to entities of Iconclass-AuthorityFile.
+  server:
+    api-version:
+      require: 1
+  l10n: l10n/customDataTypeIconclass.csv
+  webfrontend:
+    url: customDataTypeIconclass.js
+    css: customDataTypeIconclass.css
+
+    
+base_url_prefix: "webfrontend"
+    
+custom_types:
+  iconclass:
+    mapping:
+      conceptName:
+        type: text
+      conceptURI:
+        type: text
+      conceptAncestors:
+        type: text
+      facetTerm:
+        type: text_l10n
+    config:
+      mask:
+        - name: editor_display
+          parameters:
+            value:
+              type: select
+              options: ["default", "condensed"]
+    update:
+      plugin_user:
+        reference: system:root
+      exec:
+        service: "node"
+        commands:
+          - prog: "node"
+            stdin:
+              type: body
+            stdout:
+              type: body
+            args:
+              - type: "value"
+                value: "%_exec.pluginDir%/updater/iconclassUpdater.js"
+              - type: "value"
+                value: "%info.json%"
+      timeout: 60
+      batch_size: 1
+      expires_days: 1
+      interval_base_config: update_interval_iconclass.days
+              
+              
+base_config:
+  - name: update_interval_iconclass
+    group: update_custom_data_type
+    parameters:
+      days:
+        type: int
+        min: 0
+        default: 0
+        position: 0
+      default_language:
+        type: text
+        default: 'de'
+        position: 1
+
