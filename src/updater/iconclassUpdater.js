@@ -265,6 +265,29 @@ outputErr = (err2) => {
 
     process.stdin.setEncoding('utf8');
 
+    ////////////////////////////////////////////////////////////////////////////
+    // check if hour-restriction is set
+    ////////////////////////////////////////////////////////////////////////////
+
+    if (info?.config?.plugin?.['custom-data-type-iconclass']?.config?.update_iconclass?.restrict_time === true) {
+        iconclass_config = info.config.plugin['custom-data-type-iconclass'].config.update_iconclass;
+        // check if hours are configured
+        if (iconclass_config?.from_time !== false && iconclass_config?.to_time !== false) {
+            const now = new Date();
+            const hour = now.getHours();
+            // check if hours do not match
+            if (hour < iconclass_config.from_time && hour >= iconclass_config.to_time) {
+                // exit if hours do not match
+                outputData({
+                    "state": {
+                        "theend": 2,
+                        "log": ["hours do not match, cancel update"]
+                    }
+                });
+            }
+        }
+    }
+
     access_token = info && info.plugin_user_access_token;
 
     if (access_token) {
@@ -281,7 +304,7 @@ outputErr = (err2) => {
 
             frontendLanguages = config.system.config.languages.frontend;
 
-            const testDefaultLanguageConfig = config.plugin['custom-data-type-iconclass'].config.update_interval_iconclass.default_language;
+            const testDefaultLanguageConfig = config.plugin['custom-data-type-iconclass'].config.update_iconclass.default_language;
             if (testDefaultLanguageConfig) {
                 if (testDefaultLanguageConfig.length == 2) {
                     defaultLanguage = testDefaultLanguageConfig;

@@ -56,20 +56,30 @@ custom_types:
       timeout: 60
       batch_size: 1
       expires_days: 1
-      interval_base_config: update_interval_iconclass.days
               
               
 base_config:
-  - name: update_interval_iconclass
+  - name: update_iconclass
     group: update_custom_data_type
     parameters:
-      days:
-        type: int
-        min: 0
-        default: 0
+      restrict_time:
+        type: bool
+        default: false
         position: 0
+      from_time:
+        type: int
+        default: 19
+        min: 0
+        max: 24
+        position: 1
+      to_time:
+        type: int
+        default: 4
+        min: 0
+        max: 24
+        position: 2
       default_language:
         type: text
         default: 'de'
-        position: 1
+        position: 3
 

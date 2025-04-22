@@ -32,9 +32,9 @@ custom.data.type.iconclass.modal.form.popup.choose,Eintrag aus dem iconclass-Bau
 custom.data.type.iconclass.modal.form.popup.treeviewreset,Baum zurücksetzen,Reset tree
 custom.data.type.iconclass.modal.form.popup.add_choose,Eintrag wählen,Choose entry
 custom.data.type.iconclass.modal.form.popup.loadingstringtreeview,Lade Baumansicht,loading treeview
-server.config.name.system.update_interval_iconclass,iconclass-Update-Einstellungen,iconclass-Update-Configuration
-server.config.parameter.system.update_interval_iconclass.days.label,"Tage zwischen Updates. Hinweis: Das Update sollte nicht automatisch aktiviert werden, sondern nur in bestimmten Fällen manuell gestartet werden.",Days between updates
-server.config.parameter.system.update_interval_iconclass.default_language.label,Standard-Datensprache als Fallback (ISO 639-1),Default-data-language as fallback (ISO 639-1)
+server.config.name.system.update_iconclass,iconclass-Update-Einstellungen,iconclass-Update-Configuration
+server.config.parameter.system.update_iconclass.days.label,"Tage zwischen Updates. Hinweis: Das Update sollte nicht automatisch aktiviert werden, sondern nur in bestimmten Fällen manuell gestartet werden.",Days between updates
+server.config.parameter.system.update_iconclass.default_language.label,Standard-Datensprache als Fallback (ISO 639-1),Default-data-language as fallback (ISO 639-1)
 custom.data.type.iconclass.modal.form.popup.brackets.choose,Wähle einen Wert für die Klammern um fortzufahren,choose a value for the brackets to continue
 custom.data.type.iconclass.modal.form.popup.brackets.select,Ausgewählt:,Selected:
 server.config.group.system.plugin_custom-data-type-iconclass.title,ICONCLASS,ICONCLASS
