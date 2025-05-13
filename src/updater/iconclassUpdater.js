@@ -6,7 +6,7 @@ const fetch = (...args) => import('node-fetch').then(({
 
 let databaseLanguages = [];
 let frontendLanguages = [];
-let default_language = 'de';
+let defaultLanguage = 'de';
 
 let info = {}
 
@@ -143,7 +143,10 @@ main = (payload) => {
                         data = matchingRecordData.data;
                         if (data) {
                             // get desired language for preflabel. This is frontendlanguage from original data...
-                            let desiredLanguage = originalCdata.frontendLanguage;
+                            let desiredLanguage = defaultLanguage;
+                            if(originalCdata?.frontendLanguage?.length == 2) {
+                                desiredLanguage = originalCdata.frontendLanguage;
+                            }
                             // save conceptName
                             newCdata.conceptName = data.prefLabel;
                             
@@ -164,10 +167,10 @@ main = (payload) => {
                             // if no conceptName is given yet (f.e. via scripted imports..)
                             //   --> choose a label and prefer the configured default language
                             if (!newCdata?.conceptName) {
-                              // defaultLanguage given?
-                              if (defaultLanguage) {
-                                if (data['txt']?.[defaultLanguage]) {
-                                  newCdata.conceptName = data['txt'][defaultLanguage];
+                              // desiredLanguage exists?
+                              if (desiredLanguage) {
+                                if (data['txt']?.[desiredLanguage]) {
+                                  newCdata.conceptName = data['txt'][desiredLanguage];
                                 }
                               } else {
                                 if (data.txt?.de) {
