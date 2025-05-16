@@ -211,7 +211,7 @@ main = (payload) => {
                             newCdata.facetTerm = IconclassUtil.getFacetTerm(data, databaseLanguages);
                             
                             // save frontend language (same as given)
-                            newCdata.frontendLanguage = originalCdata.frontendLanguage;
+                            newCdata.frontendLanguage = desiredLanguage;
                                 
                             if (hasChanges(payload.objects[index].data, newCdata)) {
                                 payload.objects[index].data = newCdata;
