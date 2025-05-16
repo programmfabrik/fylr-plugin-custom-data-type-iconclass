@@ -103,15 +103,16 @@ class IconclassUtil
 
     # build standard upon prefLabel!
     # 1. TEXT
-    if object.txt[activeFrontendLanguage]
-      conceptName = object.txt[activeFrontendLanguage]
-    # else take first preflabel..
-    else if iconclassInfo?.txt?.de
-      conceptName = object.txt.de
-    else if iconclassInfo?.txt?.en
-      conceptName = object.txt.en
-    else
-      conceptName = object.txt[Object.keys(object.txt)[0]]
+    if object?.txt
+      if object.txt[activeFrontendLanguage]
+        conceptName = object.txt[activeFrontendLanguage]
+      # else take first preflabel..
+      else if iconclassInfo?.txt?.de
+        conceptName = object.txt.de
+      else if iconclassInfo?.txt?.en
+        conceptName = object.txt.en
+      else
+        conceptName = object.txt[Object.keys(object.txt)[0]]
 
     conceptName = object.n + ' - ' + conceptName
 

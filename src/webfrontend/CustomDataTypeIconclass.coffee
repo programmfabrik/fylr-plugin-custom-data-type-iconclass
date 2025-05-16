@@ -215,7 +215,6 @@ class CustomDataTypeIconclass extends CustomDataTypeWithCommons
               # choose record from suggestions
               onClick: (ev2, btn) ->
                   iconclassInfo = btn.getOpt("value")
-
                   ###############################################
                   # brackets with dots provided?
                   ###############################################
@@ -274,48 +273,44 @@ class CustomDataTypeIconclass extends CustomDataTypeWithCommons
                         cdata = {}
                         that.__updateResult(cdata, layout, opts)
                         @
-                  ###############################################
-                  # if no bracketsvalue in chosen record
-                  ###############################################
-                  else
-                    # lock conceptURI in savedata
-                    if iconclassInfo?.n
-                      cdata.conceptURI = 'https://iconclass.org/' + iconclassInfo.n
+                    ###############################################
+                    # if no bracketsvalue in chosen record
+                    ###############################################
                     else
-                      cdata.conceptURI = 'https://iconclass.org/' + iconclassInfo
-                    cdata.frontendLanguage = activeFrontendLanguage
+                      # lock conceptURI in savedata
+                      if iconclassInfo?.n
+                        cdata.conceptURI = 'https://iconclass.org/' + iconclassInfo.n
+                      else
+                        cdata.conceptURI = 'https://iconclass.org/' + iconclassInfo
+                      
+                      cdata.frontendLanguage = activeFrontendLanguage
 
-                    fullInfoUrl = 'https://iconclass.org/' + iconclassInfo + '.json'
-                    # download full record from iconclass
-                    searchsuggest_xhr.xhr = new (CUI.XHR)(url: fullInfoUrl)
-                    searchsuggest_xhr.xhr.start().done((data, status, statusText) ->
-                        extendedInfo_xhr = { "xhr" : undefined }
-                        iconclassInfo = data
-                        # lock conceptName in savedata
-                        cdata.conceptName = IconclassUtil.getConceptNameFromObject iconclassInfo, cdata
+                      fullInfoUrl = 'https://iconclass.org/' + iconclassInfo + '.json'
 
-                        cdata.conceptAncestors = []
-                        # if treeview, add ancestors
-                        if iconclassInfo?.p?.length > 0
-                          # save ancestor-uris to cdata
-                          for ancestor in iconclassInfo.p
-                            cdata.conceptAncestors.push 'https://iconclass.org/' + ancestor
-                        # add own uri to ancestor-uris
-                        cdata.conceptAncestors.push 'https://iconclass.org/' + iconclassInfo.n
+                      # lock conceptName in savedata
+                      cdata.conceptName = IconclassUtil.getConceptNameFromObject iconclassInfo, cdata
 
-                        cdata.conceptAncestors = cdata.conceptAncestors.join(' ')
+                      cdata.conceptAncestors = []
+                      # if treeview, add ancestors
+                      if iconclassInfo?.p?.length > 0
+                        # save ancestor-uris to cdata
+                        for ancestor in iconclassInfo.p
+                          cdata.conceptAncestors.push 'https://iconclass.org/' + ancestor
+                      # add own uri to ancestor-uris
+                      cdata.conceptAncestors.push 'https://iconclass.org/' + iconclassInfo.n
 
-                        # facetTerm
-                        cdata.facetTerm = IconclassUtil.getFacetTerm(iconclassInfo, that.getDatabaseLanguages())
-                        
-                        # lock conceptFulltext in savedata
-                        cdata._fulltext = IconclassUtil.getFullTextFromObject iconclassInfo, false
-                        # lock standard in savedata
-                        cdata._standard = IconclassUtil.getStandardTextFromObject that, iconclassInfo, cdata, false
+                      cdata.conceptAncestors = cdata.conceptAncestors.join(' ')
 
-                        that.__updateResult(cdata, layout, opts)
-                        @
-                    )
+                      # facetTerm
+                      cdata.facetTerm = IconclassUtil.getFacetTerm(iconclassInfo, that.getDatabaseLanguages())
+                      
+                      # lock conceptFulltext in savedata
+                      cdata._fulltext = IconclassUtil.getFullTextFromObject iconclassInfo, false
+                      # lock standard in savedata
+                      cdata._standard = IconclassUtil.getStandardTextFromObject that, iconclassInfo, cdata, false
+
+                      that.__updateResult(cdata, layout, opts)
+                      @
               items: menu_items
 
             # if no suggestions: set "empty" message to menu
