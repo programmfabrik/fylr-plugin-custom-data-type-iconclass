@@ -161,9 +161,36 @@ class CustomDataTypeIconclass extends CustomDataTypeWithCommons
         activeFrontendLanguage = that.getFrontendLanguage()
 
         searchUrl = 'https://iconclass.org/api/search?q=' + encodeURIComponent(input_searchstring) + '&lang=' + activeFrontendLanguage + '&size=999&page=1&sort=rank&keys=0';
+        ### 
+        result is like
+            {
+                "result": [
+                    "11H(JULIAN)131",
+                    "11H(JULIAN)13",
+                    "11H(JULIAN)119",
+                    "11H(JULIAN)84",...
+                ],
+                "total": 148
+            }
+        ###
 
         if searchStringIsNotation
           searchUrl = 'https://iconclass.org/' + encodeURIComponent(input_searchstring) + '.json'
+
+        ###
+        result is like
+            {
+                "n": "11H(JULIAN)2",
+                "p": [
+                    "1",
+                    "11",
+                    "11H",
+                    "11H(...)",
+                    "11H(JULIAN)",
+                    "11H(JULIAN)2"
+                ],
+                "b": "11H(JULIAN)2",
+        ###
 
         # start request
         searchsuggest_xhr.xhr = new (CUI.XHR)(url: searchUrl)
@@ -216,33 +243,80 @@ class CustomDataTypeIconclass extends CustomDataTypeWithCommons
               onClick: (ev2, btn) ->
                   iconclassInfo = btn.getOpt("value")
                   ###############################################
-                  # brackets with dots provided?
+                  # if search string is a notation
                   ###############################################
-                  if iconclassInfo?.n
-                    if iconclassInfo.n.includes '(...)'
-                      # open popup and force user to input bracketsvalue
-                      # Example: 25G4(...)
-                      chosenTempUri = 'https://iconclass.org/' + iconclassInfo.n
-                      CUI.prompt(text: $$('custom.data.type.iconclass.modal.form.popup.brackets.select') + " " + chosenTempUri + "\n\n" + $$('custom.data.type.iconclass.modal.form.popup.brackets.choose'), "1")
-                      .done (input) =>
-                        inputUpperCase = input.toUpperCase()
-                        inputLowerCase = input.toLowerCase()
+                  if searchStringIsNotation
+                    if iconclassInfo?.n
+                      ###############################################
+                      # brackets with dots provided?
+                      ###############################################
+                      if iconclassInfo.n.includes '(...)'
+                        # open popup and force user to input bracketsvalue
+                        # Example: 25G4(...)
+                        chosenTempUri = 'https://iconclass.org/' + iconclassInfo.n
+                        CUI.prompt(text: $$('custom.data.type.iconclass.modal.form.popup.brackets.select') + " " + chosenTempUri + "\n\n" + $$('custom.data.type.iconclass.modal.form.popup.brackets.choose'), "1")
+                        .done (input) =>
+                          inputUpperCase = input.toUpperCase()
+                          inputLowerCase = input.toLowerCase()
 
-                        # replace in notation
-                        iconclassInfo.n = iconclassInfo.n.replace('(...)', "(" + inputUpperCase + ")")
-                        # replace in labels
-                        for iconclassLabelKey, iconclassLabelValue of iconclassInfo.txt
-                          newLabel = iconclassLabelValue
-                          newLabel = newLabel.replace(" (mit NAMEN)", ': ' + inputLowerCase)
-                          newLabel = newLabel.replace(" (with NAME)", ': ' + inputLowerCase)
-                          newLabel = newLabel.replace(" (avec NOM)", ': ' + inputLowerCase)
-                          newLabel = newLabel.replace(" (col NOME)", ': ' + inputLowerCase)
-                          newLabel = newLabel.replace(" (NIMEN kanssa)", ': ' + inputLowerCase)
-                          iconclassInfo.txt[iconclassLabelKey] = newLabel
+                          # replace in notation
+                          iconclassInfo.n = iconclassInfo.n.replace('(...)', "(" + inputUpperCase + ")")
+                          # replace in labels
+                          for iconclassLabelKey, iconclassLabelValue of iconclassInfo.txt
+                            newLabel = iconclassLabelValue
+                            newLabel = newLabel.replace(" (mit NAMEN)", ': ' + inputLowerCase)
+                            newLabel = newLabel.replace(" (with NAME)", ': ' + inputLowerCase)
+                            newLabel = newLabel.replace(" (avec NOM)", ': ' + inputLowerCase)
+                            newLabel = newLabel.replace(" (col NOME)", ': ' + inputLowerCase)
+                            newLabel = newLabel.replace(" (NIMEN kanssa)", ': ' + inputLowerCase)
+                            iconclassInfo.txt[iconclassLabelKey] = newLabel
 
+                          # lock conceptURI in savedata
+                          cdata.conceptURI = 'https://iconclass.org/' + iconclassInfo.n
+                          cdata.frontendLanguage = activeFrontendLanguage
+
+                          # lock conceptName in savedata
+                          cdata.conceptName = IconclassUtil.getConceptNameFromObject iconclassInfo, cdata
+
+                          cdata.conceptAncestors = []
+                          # if treeview, add ancestors
+                          if iconclassInfo?.p?.length > 0
+                            # save ancestor-uris to cdata
+                            for ancestor in iconclassInfo.p
+                              cdata.conceptAncestors.push 'https://iconclass.org/' + ancestor
+                          # add own uri to ancestor-uris
+                          cdata.conceptAncestors.push 'https://iconclass.org/' + iconclassInfo.n
+
+                          cdata.conceptAncestors = cdata.conceptAncestors.join(' ')
+
+                          # facetTerm
+                          cdata.facetTerm = IconclassUtil.getFacetTerm(iconclassInfo, that.getDatabaseLanguages())
+                          
+                          # lock conceptFulltext in savedata
+                          cdata._fulltext = IconclassUtil.getFullTextFromObject iconclassInfo, false
+                          # lock standard in savedata
+                          cdata._standard = IconclassUtil.getStandardTextFromObject that, iconclassInfo, cdata, false
+
+                          # update the layout in form
+                          that.__updateResult(cdata, layout, opts)
+                          @
+                        .fail =>
+                          cdata = {}
+                          that.__updateResult(cdata, layout, opts)
+                          @
+                      ###############################################
+                      # if no bracketsvalue in chosen record
+                      ###############################################
+                      else
                         # lock conceptURI in savedata
-                        cdata.conceptURI = 'https://iconclass.org/' + iconclassInfo.n
+                        if iconclassInfo?.n
+                          cdata.conceptURI = 'https://iconclass.org/' + iconclassInfo.n
+                        else
+                          cdata.conceptURI = 'https://iconclass.org/' + iconclassInfo
+                        
                         cdata.frontendLanguage = activeFrontendLanguage
+
+                        fullInfoUrl = 'https://iconclass.org/' + iconclassInfo + '.json'
 
                         # lock conceptName in savedata
                         cdata.conceptName = IconclassUtil.getConceptNameFromObject iconclassInfo, cdata
@@ -266,51 +340,48 @@ class CustomDataTypeIconclass extends CustomDataTypeWithCommons
                         # lock standard in savedata
                         cdata._standard = IconclassUtil.getStandardTextFromObject that, iconclassInfo, cdata, false
 
-                        # update the layout in form
                         that.__updateResult(cdata, layout, opts)
                         @
-                      .fail =>
-                        cdata = {}
-                        that.__updateResult(cdata, layout, opts)
-                        @
-                    ###############################################
-                    # if no bracketsvalue in chosen record
-                    ###############################################
-                    else
+                  ###############################################
+                  # if search string is NOT a notation
+                  ###############################################
+                  else if !searchStringIsNotation
+                    # get full data from iconclass
+
+                    fullInfoUrl = 'https://iconclass.org/' + iconclassInfo + '.json'
+                    # start request
+                    searchsuggest_xhr.xhr = new (CUI.XHR)(url: fullInfoUrl)
+                    searchsuggest_xhr.xhr.start().done((data, status, statusText) ->
                       # lock conceptURI in savedata
-                      if iconclassInfo?.n
-                        cdata.conceptURI = 'https://iconclass.org/' + iconclassInfo.n
-                      else
-                        cdata.conceptURI = 'https://iconclass.org/' + iconclassInfo
-                      
+                      cdata.conceptURI = 'https://iconclass.org/' + iconclassInfo
                       cdata.frontendLanguage = activeFrontendLanguage
 
-                      fullInfoUrl = 'https://iconclass.org/' + iconclassInfo + '.json'
-
                       # lock conceptName in savedata
-                      cdata.conceptName = IconclassUtil.getConceptNameFromObject iconclassInfo, cdata
+                      cdata.conceptName = IconclassUtil.getConceptNameFromObject data, cdata
 
                       cdata.conceptAncestors = []
                       # if treeview, add ancestors
-                      if iconclassInfo?.p?.length > 0
+                      if data?.p?.length > 0
                         # save ancestor-uris to cdata
-                        for ancestor in iconclassInfo.p
+                        for ancestor in data.p
                           cdata.conceptAncestors.push 'https://iconclass.org/' + ancestor
                       # add own uri to ancestor-uris
-                      cdata.conceptAncestors.push 'https://iconclass.org/' + iconclassInfo.n
+                      cdata.conceptAncestors.push 'https://iconclass.org/' + iconclassInfo
 
                       cdata.conceptAncestors = cdata.conceptAncestors.join(' ')
 
                       # facetTerm
-                      cdata.facetTerm = IconclassUtil.getFacetTerm(iconclassInfo, that.getDatabaseLanguages())
+                      cdata.facetTerm = IconclassUtil.getFacetTerm(data, that.getDatabaseLanguages())
                       
                       # lock conceptFulltext in savedata
-                      cdata._fulltext = IconclassUtil.getFullTextFromObject iconclassInfo, false
+                      cdata._fulltext = IconclassUtil.getFullTextFromObject data, false
                       # lock standard in savedata
-                      cdata._standard = IconclassUtil.getStandardTextFromObject that, iconclassInfo, cdata, false
+                      cdata._standard = IconclassUtil.getStandardTextFromObject that, data, cdata, false
 
                       that.__updateResult(cdata, layout, opts)
                       @
+                    )
+
               items: menu_items
 
             # if no suggestions: set "empty" message to menu
