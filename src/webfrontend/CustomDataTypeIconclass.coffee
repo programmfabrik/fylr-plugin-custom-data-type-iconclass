@@ -1,4 +1,4 @@
-class CustomDataTypeIconclass extends CustomDataTypeWithCommons
+class CustomDataTypeIconclass extends CustomDataTypeWithCommonsAsPlugin
 
   #######################################################################
   # return name of plugin

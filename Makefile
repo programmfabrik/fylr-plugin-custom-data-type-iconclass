@@ -2,8 +2,7 @@ ZIP_NAME ?= "customDataTypeIconclass.zip"
 PLUGIN_NAME = "custom-data-type-iconclass"
 
 # coffescript-files to compile
-COFFEE_FILES = commons.coffee \
-	CustomDataTypeIconclass.coffee \
+COFFEE_FILES = CustomDataTypeIconclass.coffee \
 	CustomDataTypeIconclassTreeview.coffee \
 	CustomDataTypeIconclassFacet.coffee \
 	iconclassUtilities.coffee
@@ -26,12 +25,8 @@ build: clean buildinfojson ## clean, compile, copy files to build folder
 				cp build-info.json build/$(PLUGIN_NAME)/build-info.json # build-info
 
 				mkdir -p src/tmp # build code from coffee
-				cp easydb-library/src/commons.coffee src/tmp
 				cp src/webfrontend/*.coffee src/tmp
 				cd src/tmp && coffee -b --compile ${COFFEE_FILES} # bare-parameter is obligatory!
-
-				# first: commons! Important
-				cat src/tmp/commons.js > build/$(PLUGIN_NAME)/webfrontend/customDataTypeIconclass.js
 
 				cat src/tmp/CustomDataTypeIconclass.js >> build/$(PLUGIN_NAME)/webfrontend/customDataTypeIconclass.js
 				cat src/tmp/CustomDataTypeIconclassTreeview.js >> build/$(PLUGIN_NAME)/webfrontend/customDataTypeIconclass.js
@@ -45,7 +40,6 @@ build: clean buildinfojson ## clean, compile, copy files to build folder
 				rm -rf src/tmp # clean tmp
 
 				cp l10n/customDataTypeIconclass.csv build/$(PLUGIN_NAME)/l10n/customDataTypeIconclass.csv # copy l10n
-				tail -n+2 easydb-library/src/commons.l10n.csv >> build/$(PLUGIN_NAME)/l10n/customDataTypeIconclass.csv # copy commons
 
 				cp src/webfrontend/css/main.css build/$(PLUGIN_NAME)/webfrontend/customDataTypeIconclass.css # copy css
 				cp manifest.master.yml build/$(PLUGIN_NAME)/manifest.yml # copy manifest
