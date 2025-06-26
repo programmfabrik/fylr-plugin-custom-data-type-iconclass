@@ -85,13 +85,16 @@ class CustomDataTypeIconclass extends CustomDataTypeWithCommonsAsPlugin
           filter._unset_filter = true
           return filter
 
+      else if data[key+":has_value"]
+        return @getHasValueFilter(data, key)
+
       # popup with tree: find all records which have the given uri in their ancestors
       filter =
           type: "complex"
           search: [
               type: "match"
               bool: "must"
-              mode: "token"
+              mode: "fulltext"
               phrase: false
               fields: [ @path() + '.' + @name() + ".conceptAncestors" ]
           ]
@@ -104,20 +107,6 @@ class CustomDataTypeIconclass extends CustomDataTypeWithCommonsAsPlugin
 
       filter
 
-
-  #######################################################################
-  # make tag for expert-search
-  #######################################################################
-  getQueryFieldBadge: (data) ->
-      if ! data[@name()]
-          value = $$("field.search.badge.without")
-      else if ! data[@name()]?.conceptURI
-          value = $$("field.search.badge.without")
-      else
-          value = data[@name()].conceptName
-
-      name: @nameLocalized()
-      value: value
 
   #######################################################################
   # handle suggestions-menu
