@@ -32,10 +32,10 @@ function getConfigFromAPI() {
     return new Promise((resolve, reject) => {
         var url = 'http://fylr.localhost:8081/api/v1/config?access_token=' + access_token
         fetch(url, {
-                headers: {
-                    'Accept': 'application/json'
-                },
-            })
+            headers: {
+                'Accept': 'application/json'
+            },
+        })
             .then(response => {
                 if (response.ok) {
                     resolve(response.json());
@@ -48,6 +48,18 @@ function getConfigFromAPI() {
                 console.error("DANTE-Updater: Fehler bei der Anfrage an /config");
             });
     });
+}
+
+function isInTimeRange(currentHour, fromHour, toHour) {
+    if (fromHour === toHour) {
+        return true;
+    }
+
+    if (fromHour < toHour) { // same day
+        return currentHour >= fromHour && currentHour < toHour;
+    } else { // through the night
+        return currentHour >= fromHour || currentHour < toHour;
+    }
 }
 
 main = (payload) => {
@@ -88,7 +100,7 @@ main = (payload) => {
                 requestUrls.push(dataRequest);
             });
 
-            Promise.all(requestUrls).then(function(responses) {
+            Promise.all(requestUrls).then(function (responses) {
                 let results = [];
                 // Get a JSON object from each of the responses
                 responses.forEach((response, index) => {
@@ -108,7 +120,7 @@ main = (payload) => {
                     results.push(result);
                 });
                 return Promise.all(results.map(result => result.data));
-            }).then(function(data) {
+            }).then(function (data) {
                 let results = [];
                 data.forEach((data, index) => {
                     let url = requests[index].url;
@@ -144,78 +156,78 @@ main = (payload) => {
                         if (data) {
                             // get desired language for preflabel. This is frontendlanguage from original data...
                             let desiredLanguage = defaultLanguage;
-                            if(originalCdata?.frontendLanguage?.length == 2) {
+                            if (originalCdata?.frontendLanguage?.length == 2) {
                                 desiredLanguage = originalCdata.frontendLanguage;
                             }
                             // save conceptName
                             newCdata.conceptName = data.prefLabel;
-                            
+
                             // conceptName
                             // change only, if a frontendLanguage is set AND it is not a manually chosen label
                             if (originalCdata?.frontendLanguage?.length == 2) {
-                              if (originalCdata?.conceptNameChosenByHand == false || ! originalCdata.hasOwnProperty('conceptNameChosenByHand')) {
-                                newCdata.conceptNameChosenByHand = false;
-                                if (data['txt']) {
-                                  // if a preflabel exists in given frontendLanguage or without language (person / corporate)
-                                  if (data['txt'][originalCdata.frontendLanguage]) {
-                                    newCdata.conceptName = data['txt'][originalCdata.frontendLanguage];
-                                  }
+                                if (originalCdata?.conceptNameChosenByHand == false || !originalCdata.hasOwnProperty('conceptNameChosenByHand')) {
+                                    newCdata.conceptNameChosenByHand = false;
+                                    if (data['txt']) {
+                                        // if a preflabel exists in given frontendLanguage or without language (person / corporate)
+                                        if (data['txt'][originalCdata.frontendLanguage]) {
+                                            newCdata.conceptName = data['txt'][originalCdata.frontendLanguage];
+                                        }
+                                    }
                                 }
-                              }
                             }
 
                             // if no conceptName is given yet (f.e. via scripted imports..)
                             //   --> choose a label and prefer the configured default language
                             if (!newCdata?.conceptName) {
-                              // desiredLanguage exists?
-                              if (desiredLanguage) {
-                                if (data['txt']?.[desiredLanguage]) {
-                                  newCdata.conceptName = data['txt'][desiredLanguage];
-                                }
-                              } else {
-                                if (data.txt?.de) {
-                                  newCdata.conceptName = data.txt.de;
-                                } else if (data.txt?.en) {
-                                  newCdata.conceptName = data.txt.en;
+                                // desiredLanguage exists?
+                                if (desiredLanguage) {
+                                    if (data['txt']?.[desiredLanguage]) {
+                                        newCdata.conceptName = data['txt'][desiredLanguage];
+                                    }
                                 } else {
-                                  newCdata.conceptName = data.txt[Object.keys(data.txt)[0]];
+                                    if (data.txt?.de) {
+                                        newCdata.conceptName = data.txt.de;
+                                    } else if (data.txt?.en) {
+                                        newCdata.conceptName = data.txt.en;
+                                    } else {
+                                        newCdata.conceptName = data.txt[Object.keys(data.txt)[0]];
+                                    }
                                 }
-                              }
                             }
 
                             newCdata.conceptName = data.n + ' - ' + newCdata.conceptName;
 
                             // save conceptURI
                             newCdata.conceptURI = 'https://iconclass.org/' + data.n;
-                            
+
                             // save conceptAncestors
                             newCdata.conceptAncestors = [];
                             let conceptAncestors = [];
                             // if treeview, add ancestors
                             if (data?.p?.length > 0) {
-                              // save ancestor-uris to cdata
-                              for (let ancestor of data.p) {
-                                conceptAncestors.push('https://iconclass.org/' + ancestor);
-                              }
-                              // add own uri to ancestor-uris
-                              conceptAncestors.push('https://iconclass.org/' + data.n);
+                                // save ancestor-uris to cdata
+                                for (let ancestor of data.p) {
+                                    conceptAncestors.push('https://iconclass.org/' + ancestor);
+                                }
+                                // add own uri to ancestor-uris
+                                conceptAncestors.push('https://iconclass.org/' + data.n);
                             }
                             let conceptAncestorsString = conceptAncestors.join(' ');
                             newCdata.conceptAncestors = conceptAncestorsString;
-                            
+
                             // save _fulltext
                             newCdata._fulltext = IconclassUtil.getFullTextFromObject(data, databaseLanguages);
                             // save _standard
                             newCdata._standard = IconclassUtil.getStandardTextFromObject(null, data, originalCdata, databaseLanguages);
                             // save facet
                             newCdata.facetTerm = IconclassUtil.getFacetTerm(data, databaseLanguages);
-                            
+
                             // save frontend language (same as given)
                             newCdata.frontendLanguage = desiredLanguage;
-                                
+
                             if (hasChanges(payload.objects[index].data, newCdata)) {
                                 payload.objects[index].data = newCdata;
-                            } else {}
+                            } else { }
                         }
                     } else {
                         console.error('No matching record found');
@@ -279,7 +291,7 @@ outputErr = (err2) => {
             const now = new Date();
             const hour = now.getHours();
             // check if hours do not match
-            if (hour < iconclass_config.from_time && hour >= iconclass_config.to_time) {
+            if (!isInTimeRange(hour, iconclass_config.from_time, iconclass_config.to_time)) {
                 // exit if hours do not match
                 outputData({
                     "state": {
