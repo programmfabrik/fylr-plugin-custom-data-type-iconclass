@@ -62,6 +62,15 @@ function isInTimeRange(currentHour, fromHour, toHour) {
     }
 }
 
+function getNewCustomExpiresAt() {
+    const newExpiresAt = new Date()
+    const customExpirationConfig = info?.config?.plugin?.['custom-data-type-iconclass']?.config?.update_iconclass?.custom_expires_days || 1
+
+    newExpiresAt.setDate(newExpiresAt.getDate() + customExpirationConfig);
+
+    return newExpiresAt.toISOString()
+}
+
 main = (payload) => {
     switch (payload.action) {
         case "start_update":
@@ -227,7 +236,11 @@ main = (payload) => {
 
                             if (hasChanges(payload.objects[index].data, newCdata)) {
                                 payload.objects[index].data = newCdata;
-                            } else { }
+                            } else {
+                                payload.objects[index].data = originalCdata
+                            }
+                            // set expires at for the custom data object according to the plugin base config
+                            payload.objects[index].data._expires_at = getNewCustomExpiresAt()
                         }
                     } else {
                         console.error('No matching record found');
