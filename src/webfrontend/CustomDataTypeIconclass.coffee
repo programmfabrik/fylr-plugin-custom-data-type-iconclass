@@ -202,6 +202,8 @@ class CustomDataTypeIconclass extends CustomDataTypeWithCommonsAsPlugin
             menu_items = []
             for suggestion, key in data
               do(key) ->
+                if Object.keys(suggestion).length == 0
+                  return                
                 if searchStringIsNotation
                   # get label in users frontendLanguage
                   if suggestion.txt[activeFrontendLanguage]
