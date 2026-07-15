@@ -6,8 +6,10 @@ plugin:
     de-DE: Iconclass-Verknüpfung
     en-US: Iconclass-Referencing
   info:
-    de-DE: Stellt Verknüpfungen mit dem Normdatendienst Iconclass her.
-    en-US: Use for references to entities of Iconclass-AuthorityFile.
+    de-DE: |
+      Ergänzt fylr um einen Feldtyp, mit dem sich Datensätze mit [Iconclass](http://iconclass.org/) verknüpfen lassen – dem etablierten Klassifikationssystem für die Ikonografie von Kunst und Bildern. Redakteure durchsuchen Iconclass-Notationen und Schlagwörter direkt im Maskenfeld und speichern einen Verweis auf das gewählte Konzept. Ein optionaler nächtlicher Updater hält verknüpfte Einträge aktuell.
+    en-US: |
+      Adds a custom data type for linking records to [Iconclass](http://iconclass.org/), the standard classification system for the iconography of art and images. Editors search Iconclass notations and subject terms from a mask field and store a link to the selected concept. An optional nightly updater keeps linked entries in sync.
   server:
     api-version:
       require: 1
@@ -18,9 +20,8 @@ plugin:
     dependencies:
       - commons-library
 
-    
+
 base_url_prefix: "webfrontend"
-    
 custom_types:
   iconclass:
     mapping:
@@ -61,8 +62,8 @@ custom_types:
       timeout: 60
       batch_size: 1
       expires_days: 1
-              
-              
+
+
 base_config:
   - name: update_iconclass
     group: update_custom_data_type
