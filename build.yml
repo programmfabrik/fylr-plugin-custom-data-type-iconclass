@@ -11,19 +11,24 @@
 server:
   install:
   - l10n/customDataTypeIconclass.csv
+  # assembled server-side files, sources in the order written
+  bundles:
+    - out: updater/iconclassUpdater.js
+      sources:
+      - src/updater/iconclassUpdater.js
+      - webfrontend/iconclassUtilities.coffee
 webfrontend:
-  coffee1:
-  - webfrontend/CustomDataTypeIconclass.coffee
-  - webfrontend/CustomDataTypeIconclassTreeview.coffee
-  - webfrontend/CustomDataTypeIconclassFacet.coffee
-  - webfrontend/iconclassUtilities.coffee
+  # assembled into plugin.webfrontend.url, in this order:
+  # .coffee is compiled (CoffeeScript 1.x), .scss compiled,
+  # anything else taken verbatim
+  bundles:
+    - sources:
+        - webfrontend/CustomDataTypeIconclass.coffee
+        - webfrontend/CustomDataTypeIconclassTreeview.coffee
+        - webfrontend/CustomDataTypeIconclassFacet.coffee
+        - webfrontend/iconclassUtilities.coffee
   install:
   - webfrontend/customDataTypeIconclass.css
-build:
-  bundles:
-  - out: updater/iconclassUpdater.js
-    sources:
-    - src/updater/iconclassUpdater.js
-    - webfrontend/iconclassUtilities.coffee
-  zip_aliases:
-  - customDataTypeIconclass.zip
+
+zip_aliases:
+- customDataTypeIconclass.zip
